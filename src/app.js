@@ -36,4 +36,17 @@ if (process.env.NODE_ENV !== 'test') {
   connect();
 }
 
+
+// Serve frontend static files
+const path = require('path');
+const frontendDist = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendDist));
+
+// Serve index.html for all non-API routes (SPA fallback)
+app.get(/^\/(?!cms\/|auth\/|api\/).*/, (req, res, next) => {
+  // Only handle GET requests that are not API or CMS endpoints
+  if (req.method !== 'GET') return next();
+  res.sendFile(path.join(frontendDist, 'index.html'));
+});
+
 module.exports = app;

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react'
 
 export default function Users({ token }) {
@@ -7,14 +8,17 @@ export default function Users({ token }) {
   const [email, setEmail] = useState('')
   const [school, setSchool] = useState('')
   const [error, setError] = useState(null)
+  const [resetUserId, setResetUserId] = useState(null)
+  const [resetPassword, setResetPassword] = useState('')
+  const [resetError, setResetError] = useState(null)
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
   useEffect(() => {
     if (!token) return
     setLoading(true)
     Promise.all([
-      fetch(apiBase + '/users', { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
-      fetch(apiBase + '/schools', { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json())
+      fetch(apiBase + '/cms/users', { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+      fetch(apiBase + '/cms/schools', { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json())
     ])
       .then(([usersRes, schoolsRes]) => {
         setUsers(Array.isArray(usersRes) ? usersRes : [])
@@ -30,7 +34,7 @@ export default function Users({ token }) {
     try {
       const body = { email }
       if (school) body.school = school
-      const r = await fetch(apiBase + '/users', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body) })
+      const r = await fetch(apiBase + '/cms/users', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body) })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error || 'Failed')
       setUsers([d, ...users])
@@ -68,21 +72,51 @@ export default function Users({ token }) {
             <th style={{ textAlign: 'left', padding: 6 }}>School</th>
             <th style={{ textAlign: 'left', padding: 6 }}>Invited</th>
             <th style={{ textAlign: 'left', padding: 6 }}>Accepted</th>
+            <th style={{ textAlign: 'left', padding: 6 }}>Invite Token</th>
             <th style={{ textAlign: 'left', padding: 6 }}>Actions</th>
           </tr>
         </thead>
         <tbody>
           {users.map((u) => (
-            <tr key={u._id}>
-              <td style={{ padding: 6 }}>{u.email}</td>
-              <td style={{ padding: 6 }}>{u.school ? (typeof u.school === 'object' ? u.school.name : u.school) : '-'}</td>
-              <td style={{ padding: 6 }}>{u.invitedAt ? new Date(u.invitedAt).toLocaleString() : '-'}</td>
-              <td style={{ padding: 6 }}>{u.acceptedAt ? new Date(u.acceptedAt).toLocaleString() : '-'}</td>
-              <td style={{ padding: 6 }}>
-                {!u.acceptedAt && <button className="btn btn-small" onClick={async () => { const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/users/${u._id}/accept`, { method: 'POST' }); if (r.ok) { const d = await r.json(); setUsers(users.map(x => x._id === u._id ? d : x)); } }}>Accept</button>}
-                <button className="btn btn-small" onClick={async () => { if (!confirm('Delete this user?')) return; const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/users/${u._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); if (r.ok) setUsers(users.filter(x => x._id !== u._id)); }}>Delete</button>
-              </td>
-            </tr>
+            <React.Fragment key={u._id}>
+              <tr>
+                <td style={{ padding: 6 }}>{u.email}</td>
+                <td style={{ padding: 6 }}>{u.school ? (typeof u.school === 'object' ? u.school.name : u.school) : '-'}</td>
+                <td style={{ padding: 6 }}>{u.invitedAt ? new Date(u.invitedAt).toLocaleString() : '-'}</td>
+                <td style={{ padding: 6 }}>{u.acceptedAt ? new Date(u.acceptedAt).toLocaleString() : '-'}</td>
+                <td style={{ padding: 6, fontFamily: 'monospace', fontSize: 12 }}>{u.inviteToken || '-'}</td>
+                <td style={{ padding: 6 }}>
+                  <button className="btn btn-small" onClick={async () => { if (!confirm('Delete this user?')) return; const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/cms/users/${u._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); if (r.ok) setUsers(users.filter(x => x._id !== u._id)); }}>Delete</button>
+                  <button className="btn btn-small" style={{ marginLeft: 4 }} onClick={() => { setResetUserId(u._id); setResetPassword(''); setResetError(null); }}>Set Password</button>
+                </td>
+              </tr>
+              {resetUserId === u._id && (
+                <tr>
+                  <td colSpan={6} style={{ background: '#f8f8f8', padding: 8 }}>
+                    <form style={{ display: 'flex', gap: 8, alignItems: 'center' }} onSubmit={async (e) => {
+                      e.preventDefault();
+                      setResetError(null);
+                      try {
+                        const r = await fetch(apiBase + `/cms/users/${u._id}/set-password`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                          body: JSON.stringify({ password: resetPassword })
+                        });
+                        if (!r.ok) throw new Error((await r.json()).error || 'Failed');
+                        setResetUserId(null);
+                      } catch (err) {
+                        setResetError(err.message || 'Error');
+                      }
+                    }}>
+                      <input type="password" placeholder="New password" value={resetPassword} onChange={e => setResetPassword(e.target.value)} />
+                      <button className="btn btn-small" type="submit">Save</button>
+                      <button className="btn btn-small" type="button" onClick={() => setResetUserId(null)}>Cancel</button>
+                      {resetError && <span className="error">{resetError}</span>}
+                    </form>
+                  </td>
+                </tr>
+              )}
+            </React.Fragment>
           ))}
         </tbody>
       </table>

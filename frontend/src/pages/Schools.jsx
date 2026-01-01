@@ -12,7 +12,7 @@ export default function Schools({ token }) {
   useEffect(() => {
     if (!token) return
     setLoading(true)
-    fetch(apiBase + '/schools', { headers: { Authorization: `Bearer ${token}` } })
+    fetch(apiBase + '/cms/schools', { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((d) => setSchools(Array.isArray(d) ? d : []))
       .catch(() => setError('Failed to load'))
@@ -22,7 +22,7 @@ export default function Schools({ token }) {
   const handleCreate = async (e) => {
     e.preventDefault(); setError(null)
     try {
-      const r = await fetch(apiBase + '/schools', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ name, address, contact }) })
+      const r = await fetch(apiBase + '/cms/schools', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ name, address, contact }) })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error || 'Failed')
       setSchools([d, ...schools])
@@ -69,7 +69,7 @@ export default function Schools({ token }) {
                     <button className="btn btn-small" onClick={async () => {
                       try {
                         const body = { name: s._name, address: s._address, contact: s._contact };
-                        const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/schools/${s._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body) });
+                        const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/cms/schools/${s._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body) });
                         if (!r.ok) throw new Error('Update failed');
                         const d = await r.json();
                         setSchools(schools.map(x => x._id === s._id ? d : x));
@@ -80,7 +80,7 @@ export default function Schools({ token }) {
                 ) : (
                   <>
                     <button className="btn btn-small" onClick={() => setSchools(schools.map(x => x._id === s._id ? { ...x, _editing: true, _name: s.name, _address: s.address, _contact: s.contact } : x))}>Edit</button>
-                    <button className="btn btn-small" onClick={async () => { if (!confirm('Delete this school?')) return; const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/schools/${s._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); if (r.ok) setSchools(schools.filter(x => x._id !== s._id)); }}>Delete</button>
+                    <button className="btn btn-small" onClick={async () => { if (!confirm('Delete this school?')) return; const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/cms/schools/${s._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); if (r.ok) setSchools(schools.filter(x => x._id !== s._id)); }}>Delete</button>
                   </>
                 )}
               </td>

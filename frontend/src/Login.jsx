@@ -18,7 +18,7 @@ export default function Login({ onLogin }) {
 
     setLoading(true)
     try {
-      const res = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/auth/login', {
+      const res = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/cms/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })

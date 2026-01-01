@@ -26,7 +26,7 @@ export default function Dashboard({ token, onLogout }) {
 
   useEffect(() => {
     if (!token) return
-    fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/auth/me', {
+    fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/cms/auth/me', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then((r) => {

@@ -16,8 +16,8 @@ export default function Admins({ token }) {
     if (!token) return
     setLoading(true)
     Promise.all([
-      fetch(apiBase + '/admins', { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
-      fetch(apiBase + '/schools', { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json())
+      fetch(apiBase + '/cms/admins', { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+      fetch(apiBase + '/cms/schools', { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json())
     ])
       .then(([adminsRes, schoolsRes]) => {
         setAdmins(Array.isArray(adminsRes) ? adminsRes : [])
@@ -33,7 +33,7 @@ export default function Admins({ token }) {
     try {
       const body = { email, password, role }
       if (role === 'school') body.school = school || null
-      const r = await fetch(apiBase + '/admins', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body) })
+      const r = await fetch(apiBase + '/cms/admins', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body) })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error || 'Failed')
       setAdmins([d, ...admins])
@@ -113,7 +113,7 @@ export default function Admins({ token }) {
                     <button className="btn btn-small" onClick={async () => {
                       try {
                         const body = { email: a._email, role: a._role, school: a._school || null };
-                        const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/admins/${a._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body) });
+                        const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/cms/admins/${a._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body) });
                         if (!r.ok) throw new Error('Update failed');
                         const d = await r.json();
                         setAdmins(admins.map(x => x._id === a._id ? d : x));
@@ -126,7 +126,7 @@ export default function Admins({ token }) {
                     <button className="btn btn-small" onClick={() => setAdmins(admins.map(x => x._id === a._id ? { ...x, _editing: true, _email: a.email, _role: a.role, _school: a.school && a.school._id ? a.school._id : (a.school || '') } : x))}>Edit</button>
                     <button className="btn btn-small" onClick={async () => {
                       if (!confirm('Delete this admin?')) return;
-                      const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/admins/${a._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+                      const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/cms/admins/${a._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
                       if (r.ok) setAdmins(admins.filter(x => x._id !== a._id));
                     }}>Delete</button>
                   </>

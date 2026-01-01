@@ -49,6 +49,82 @@ paths:
                                 $ref: '#/components/schemas/UserInvite'
                         responses:
                           '201':
+                /cms/users/{id}/set-password:
+                  post:
+                    summary: Set user password (admin only)
+                    tags: [Users]
+                    security:
+                      - bearerAuth: []
+                    parameters:
+                      - in: path
+                        name: id
+                        schema:
+                          type: string
+                        required: true
+                    requestBody:
+                      required: true
+                      content:
+                        application/json:
+                          schema:
+                            type: object
+                            properties:
+                              password:
+                                type: string
+                    responses:
+                      '200':
+                        description: Password set
+                /cms/users/accept:
+                  post:
+                    summary: Accept invite and set password (user)
+                    tags: [Users]
+                    requestBody:
+                      required: true
+                      content:
+                        application/json:
+                          schema:
+                            type: object
+                            properties:
+                              token:
+                                type: string
+                              password:
+                                type: string
+                    responses:
+                      '200':
+                        description: User accepted and password set
+                /cms/users/request-reset:
+                  post:
+                    summary: Request password reset (user)
+                    tags: [Users]
+                    requestBody:
+                      required: true
+                      content:
+                        application/json:
+                          schema:
+                            type: object
+                            properties:
+                              email:
+                                type: string
+                    responses:
+                      '200':
+                        description: Reset email sent
+                /cms/users/reset:
+                  post:
+                    summary: Reset password with token (user)
+                    tags: [Users]
+                    requestBody:
+                      required: true
+                      content:
+                        application/json:
+                          schema:
+                            type: object
+                            properties:
+                              token:
+                                type: string
+                              password:
+                                type: string
+                    responses:
+                      '200':
+                        description: Password reset
                             description: Invited user
                             content:
                               application/json:
@@ -410,6 +486,15 @@ components:
         school:
           type: string
         acceptedAt:
+          type: string
+          format: date-time
+        passwordHash:
+          type: string
+        inviteToken:
+          type: string
+        resetToken:
+          type: string
+        resetTokenExpires:
           type: string
           format: date-time
     UserInvite:
