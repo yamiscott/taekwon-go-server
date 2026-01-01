@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 
-export default function Login() {
+export default function Login({ onLogin }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     // local validation
@@ -16,12 +16,26 @@ export default function Login() {
       return
     }
 
-    // simulate async login
     setLoading(true)
-    setTimeout(() => {
+    try {
+      const res = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data && data.error ? data.error : 'Login failed')
+        setLoading(false)
+        return
+      }
+      const token = data.token
+      if (onLogin) onLogin(token)
       setLoading(false)
-      alert('Sign in is a no-op in this demo — implement auth later.')
-    }, 700)
+    } catch (err) {
+      setError('Network error')
+      setLoading(false)
+    }
   }
 
   return (
@@ -62,12 +76,6 @@ export default function Login() {
             <button className="btn primary" type="submit" disabled={loading} aria-busy={loading}>
               {loading ? <span className="spinner" aria-hidden /> : 'Sign in'}
             </button>
-
-            <div className="separator">Or continue with</div>
-            <div className="socials">
-              <button className="btn social" aria-label="Sign in with GitHub">GitHub</button>
-              <button className="btn social" aria-label="Sign in with Google">Google</button>
-            </div>
 
             <div className="signup muted">New here? <a href="#" onClick={(e) => e.preventDefault()}>Create an account</a></div>
           </form>

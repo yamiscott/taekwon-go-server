@@ -8,6 +8,24 @@ const connect = async () => {
       useUnifiedTopology: true
     });
     console.log('Connected to MongoDB');
+
+    // Ensure an admin exists for initial login
+    try {
+      const Admin = require('./models/admin');
+      const email = 'yaminoscott@gmail.com';
+      const existing = await Admin.findOne({ email });
+      if (!existing) {
+        const crypto = require('crypto');
+        const bcrypt = require('bcryptjs');
+        const pw = crypto.randomBytes(9).toString('base64').replace(/[^a-zA-Z0-9]/g, 'A').slice(0, 12);
+        const hash = await bcrypt.hash(pw, 10);
+        await Admin.create({ email, passwordHash: hash });
+        console.log(`Created admin ${email} with password: ${pw}`);
+      }
+    } catch (err) {
+      console.error('Admin seeding error:', err);
+    }
+
     return mongoose.connection;
   } catch (err) {
     console.error('MongoDB connection error:', err);

@@ -1,14 +1,18 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const items = require('./routes/items');
+const authRoutes = require('./routes/auth');
 const { connect } = require('./db');
 
 const app = express();
 
+app.use(cors({ origin: true }));
 app.use(express.json());
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
+app.use('/auth', authRoutes);
 app.use('/items', items);
 
 // Global error handler
