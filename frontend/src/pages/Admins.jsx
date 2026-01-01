@@ -45,10 +45,10 @@ export default function Admins({ token }) {
     }
   }
 
-  if (loading) return <div className="login-right"><p>Loading...</p></div>
+  if (loading) return <div><p>Loading...</p></div>
 
   return (
-    <div className="login-right">
+    <div>
       <h2>Admins</h2>
       {error && <p className="error">{error}</p>}
 

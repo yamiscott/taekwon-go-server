@@ -1,4 +1,3 @@
-
 const express = require('express');
 const User = require('../models/user');
 const Admin = require('../models/admin');
@@ -142,6 +141,22 @@ router.delete('/:id', auth, async (req, res, next) => {
 
     await User.deleteOne({ _id: user._id });
     res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+});
+
+// CMS: Admin sets user as accepted (sets acceptedAt timestamp)
+router.post('/:id/accept', auth, async (req, res, next) => {
+  try {
+    const requester = await getRequester(req);
+    if (!requester) return res.status(401).json({ error: 'Unauthorized' });
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'Not found' });
+    if (user.acceptedAt) return res.status(400).json({ error: 'Already accepted' });
+    user.acceptedAt = new Date();
+    await user.save();
+    res.json(user);
   } catch (err) {
     next(err);
   }

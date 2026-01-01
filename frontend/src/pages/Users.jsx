@@ -45,10 +45,10 @@ export default function Users({ token }) {
     }
   }
 
-  if (loading) return <div className="login-right"><p>Loading...</p></div>
+  if (loading) return <div><p>Loading...</p></div>
 
   return (
-    <div className="login-right">
+    <div>
       <h2>Users</h2>
       {error && <p className="error">{error}</p>}
 
@@ -88,6 +88,18 @@ export default function Users({ token }) {
                 <td style={{ padding: 6 }}>
                   <button className="btn btn-small" onClick={async () => { if (!confirm('Delete this user?')) return; const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/cms/users/${u._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); if (r.ok) setUsers(users.filter(x => x._id !== u._id)); }}>Delete</button>
                   <button className="btn btn-small" style={{ marginLeft: 4 }} onClick={() => { setResetUserId(u._id); setResetPassword(''); setResetError(null); }}>Set Password</button>
+                  {!u.acceptedAt && (
+                    <button className="btn btn-small" style={{ marginLeft: 4 }} onClick={async () => {
+                      const r = await fetch(apiBase + `/cms/users/${u._id}/accept`, {
+                        method: 'POST',
+                        headers: { Authorization: `Bearer ${token}` }
+                      });
+                      if (r.ok) {
+                        const updated = await r.json();
+                        setUsers(users.map(x => x._id === u._id ? updated : x));
+                      }
+                    }}>Accept</button>
+                  )}
                 </td>
               </tr>
               {resetUserId === u._id && (

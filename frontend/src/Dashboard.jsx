@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import Admins from './pages/Admins'
 import Users from './pages/Users'
 import Schools from './pages/Schools'
+import RightPanel from './components/RightPanel'
 
 export default function Dashboard({ token, onLogout }) {
   const [admin, setAdmin] = useState(null)
@@ -48,9 +49,9 @@ export default function Dashboard({ token, onLogout }) {
   if (!admin) return <div className="login-right"><p>Unauthorized</p></div>
 
   return (
-    <div style={{ display: 'flex', gap: 20 }}>
-      <div style={{ width: 220 }}>
-        <div className="card sidebar">
+    <div className="cms-container" style={{ display: 'flex', gap: 0 }}>
+      <div style={{ width: 220, minWidth: 220, background: 'linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))', borderTopLeftRadius: 14, borderBottomLeftRadius: 14, boxShadow: '2px 0 16px rgba(2,6,23,0.12)', flexShrink: 0 }}>
+        <div className="card sidebar" style={{ height: '100%', minHeight: '80vh', borderRadius: 0, boxShadow: 'none', background: 'none' }}>
           <h3 style={{ marginTop: 0 }}>Menu</h3>
           <ul className="menu">
             <li className="menu-item"><a href="/" className={`menu-link ${page === 'home' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); navigate('home') }}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 11.5L12 4l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5z"/></svg>Overview</a></li>
@@ -62,7 +63,7 @@ export default function Dashboard({ token, onLogout }) {
         </div>
       </div>
 
-      <div style={{ flex: 1 }}>
+      <RightPanel>
         {page === 'home' && (
           <div className="login-right">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -84,7 +85,7 @@ export default function Dashboard({ token, onLogout }) {
         {page === 'users' && <Users token={token} />}
 
         {page === 'schools' && <Schools token={token} />}
-      </div>
+      </RightPanel>
     </div>
   )
 }

@@ -26,12 +26,20 @@ router.post('/login', async (req, res, next) => {
 
 // GET /auth/me
 const auth = require('../middleware/auth');
+const School = require('../models/school');
 router.get('/me', auth, async (req, res, next) => {
   try {
     if (!req.user || !req.user.sub) return res.status(401).json({ error: 'Unauthorized' });
     const user = await User.findById(req.user.sub).select('-__v');
     if (!user) return res.status(404).json({ error: 'Not found' });
-    return res.json({ user });
+    let schoolName = null;
+    if (user.school) {
+      const school = await School.findById(user.school).select('name');
+      if (school) schoolName = school.name;
+    }
+    const userObj = user.toObject();
+    userObj.school = user.school ? { _id: user.school, name: schoolName } : null;
+    return res.json({ user: userObj });
   } catch (err) {
     next(err);
   }
