@@ -15,6 +15,16 @@ services:
     restart: always
     volumes:
       - mongo-data:/data/db
+  cms:
+    build:
+      context: ./frontend
+    ports:
+      - "8080:80"
+    environment:
+      - FRONTEND_ENV=production
+    restart: always
+    depends_on:
+      - app
 
 volumes:
   mongo-data:
