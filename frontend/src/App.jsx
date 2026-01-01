@@ -12,6 +12,7 @@ export default function App() {
   const handleLogout = () => {
     localStorage.removeItem('token')
     setToken(null)
+    try { history.pushState({}, '', '/') } catch (e) { /* noop */ }
   }
 
   useEffect(() => {

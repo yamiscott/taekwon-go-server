@@ -3,6 +3,9 @@ const express = require('express');
 const cors = require('cors');
 const items = require('./routes/items');
 const authRoutes = require('./routes/auth');
+const adminsRoutes = require('./routes/admins');
+const usersRoutes = require('./routes/users');
+const schoolsRoutes = require('./routes/schools');
 const { connect } = require('./db');
 
 const app = express();
@@ -12,7 +15,15 @@ app.use(express.json());
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
-app.use('/auth', authRoutes);
+// CMS (admin-side) endpoints (under /cms/*)
+app.use('/cms/auth', authRoutes);
+app.use('/cms/admins', adminsRoutes);
+app.use('/cms/schools', schoolsRoutes);
+
+// App (client-side) endpoints
+const appAuth = require('./routes/appAuth');
+app.use('/auth', appAuth); // app user auth
+app.use('/users', usersRoutes);
 app.use('/items', items);
 
 // Global error handler

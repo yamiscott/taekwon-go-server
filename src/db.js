@@ -19,8 +19,14 @@ const connect = async () => {
         const bcrypt = require('bcryptjs');
         const pw = crypto.randomBytes(9).toString('base64').replace(/[^a-zA-Z0-9]/g, 'A').slice(0, 12);
         const hash = await bcrypt.hash(pw, 10);
-        await Admin.create({ email, passwordHash: hash });
-        console.log(`Created admin ${email} with password: ${pw}`);
+        // Make the initial seeded admin a superadmin so they can manage the system
+        await Admin.create({ email, passwordHash: hash, role: 'superadmin' });
+        console.log(`Created admin ${email} (role=superadmin) with password: ${pw}`);
+      } else if (existing.role !== 'superadmin') {
+        // Promote any existing seeded admin to superadmin (helpful during development)
+        existing.role = 'superadmin';
+        await existing.save();
+        console.log(`Promoted existing admin ${email} to role=superadmin`);
       }
     } catch (err) {
       console.error('Admin seeding error:', err);

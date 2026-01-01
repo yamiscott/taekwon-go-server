@@ -1,0 +1,527 @@
+openapi: 3.0.3
+info:
+  title: Taekwon-go Server API
+  version: 1.0.0
+  description: API documentation for Taekwon-go server (CMS and App endpoints)
+servers:
+  - url: http://localhost:3000
+paths:
+  /cms/auth/login:
+    post:
+      summary: Admin login
+      tags: [CMS Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: JWT token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+  /cms/auth/me:
+    get:
+      summary: Get current admin info
+      tags: [CMS Auth]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Admin info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  admin:
+                    $ref: '#/components/schemas/Admin'
+  /cms/admins:
+    get:
+      summary: List admins
+      tags: [Admins]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of admins
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Admin'
+    post:
+      summary: Create admin
+      tags: [Admins]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCreate'
+      responses:
+        '201':
+          description: Created admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+  /cms/admins/{id}:
+    get:
+      summary: Get admin by ID
+      tags: [Admins]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Admin info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+    put:
+      summary: Update admin
+      tags: [Admins]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUpdate'
+      responses:
+        '200':
+          description: Updated admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+    delete:
+      summary: Delete admin
+      tags: [Admins]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '204':
+          description: Deleted
+  /cms/schools:
+    get:
+      summary: List schools
+      tags: [Schools]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of schools
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/School'
+    post:
+      summary: Create school
+      tags: [Schools]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SchoolCreate'
+      responses:
+        '201':
+          description: Created school
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/School'
+  /cms/schools/{id}:
+    get:
+      summary: Get school by ID
+      tags: [Schools]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: School info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/School'
+    put:
+      summary: Update school
+      tags: [Schools]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SchoolUpdate'
+      responses:
+        '200':
+          description: Updated school
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/School'
+    delete:
+      summary: Delete school
+      tags: [Schools]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '204':
+          description: Deleted
+  /auth/login:
+    post:
+      summary: App user login
+      tags: [App Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: JWT token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+  /auth/me:
+    get:
+      summary: Get current app user info
+      tags: [App Auth]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: App user info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+  /users:
+    get:
+      summary: List users (admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      summary: Invite user (admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInvite'
+      responses:
+        '201':
+          description: Invited user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /users/{id}/accept:
+    post:
+      summary: Accept invite (user)
+      tags: [Users]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Accepted user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /users/{id}:
+    delete:
+      summary: Delete user (admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '204':
+          description: Deleted
+  /items:
+    get:
+      summary: List items
+      tags: [Items]
+      responses:
+        '200':
+          description: List of items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+    post:
+      summary: Create item
+      tags: [Items]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemCreate'
+      responses:
+        '201':
+          description: Created item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+  /items/{id}:
+    get:
+      summary: Get item by ID
+      tags: [Items]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Item info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+    put:
+      summary: Update item
+      tags: [Items]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemUpdate'
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Updated item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+    delete:
+      summary: Delete item
+      tags: [Items]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Deleted
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Admin:
+      type: object
+      properties:
+        _id:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        school:
+          type: string
+    AdminCreate:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+        school:
+          type: string
+    AdminUpdate:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+        school:
+          type: string
+    School:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+        contact:
+          type: string
+    SchoolCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        contact:
+          type: string
+    SchoolUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        contact:
+          type: string
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        email:
+          type: string
+        school:
+          type: string
+        acceptedAt:
+          type: string
+          format: date-time
+    UserInvite:
+      type: object
+      properties:
+        email:
+          type: string
+        school:
+          type: string
+    Item:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    ItemCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    ItemUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
