@@ -21,71 +21,71 @@ paths:
                   type: string
                 password:
                   type: string
-      responses:
-        '200':
-          description: JWT token
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-  /cms/auth/me:
-    get:
-      summary: Get current admin info
-      tags: [CMS Auth]
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Admin info
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  admin:
-                    $ref: '#/components/schemas/Admin'
-  /cms/admins:
-    get:
-      summary: List admins
-      tags: [Admins]
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: List of admins
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Admin'
-    post:
-      summary: Create admin
-      tags: [Admins]
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminCreate'
-      responses:
-        '201':
-          description: Created admin
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Admin'
-  /cms/admins/{id}:
-    get:
-      summary: Get admin by ID
-      tags: [Admins]
-      security:
-        - bearerAuth: []
+                    /cms/users:
+                      get:
+                        summary: List users (admin only)
+                        tags: [Users]
+                        security:
+                          - bearerAuth: []
+                        responses:
+                          '200':
+                            description: List of users
+                            content:
+                              application/json:
+                                schema:
+                                  type: array
+                                  items:
+                                    $ref: '#/components/schemas/User'
+                      post:
+                        summary: Invite user (admin only)
+                        tags: [Users]
+                        security:
+                          - bearerAuth: []
+                        requestBody:
+                          required: true
+                          content:
+                            application/json:
+                              schema:
+                                $ref: '#/components/schemas/UserInvite'
+                        responses:
+                          '201':
+                            description: Invited user
+                            content:
+                              application/json:
+                                schema:
+                                  $ref: '#/components/schemas/User'
+                    /cms/users/{id}/accept:
+                      post:
+                        summary: Accept invite (user)
+                        tags: [Users]
+                        parameters:
+                          - in: path
+                            name: id
+                            schema:
+                              type: string
+                            required: true
+                        responses:
+                          '200':
+                            description: Accepted user
+                            content:
+                              application/json:
+                                schema:
+                                  $ref: '#/components/schemas/User'
+                    /cms/users/{id}:
+                      delete:
+                        summary: Delete user (admin only)
+                        tags: [Users]
+                        security:
+                          - bearerAuth: []
+                        parameters:
+                          - in: path
+                            name: id
+                            schema:
+                              type: string
+                            required: true
+                        responses:
+                          '204':
+                            description: Deleted
       parameters:
         - in: path
           name: id
@@ -331,86 +331,6 @@ paths:
       responses:
         '204':
           description: Deleted
-  /items:
-    get:
-      summary: List items
-      tags: [Items]
-      responses:
-        '200':
-          description: List of items
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Item'
-    post:
-      summary: Create item
-      tags: [Items]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ItemCreate'
-      responses:
-        '201':
-          description: Created item
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Item'
-  /items/{id}:
-    get:
-      summary: Get item by ID
-      tags: [Items]
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
-      responses:
-        '200':
-          description: Item info
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Item'
-    put:
-      summary: Update item
-      tags: [Items]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ItemUpdate'
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
-      responses:
-        '200':
-          description: Updated item
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Item'
-    delete:
-      summary: Delete item
-      tags: [Items]
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
-      responses:
-        '200':
-          description: Deleted
 components:
   securitySchemes:
     bearerAuth:
@@ -498,30 +418,4 @@ components:
         email:
           type: string
         school:
-          type: string
-    Item:
-      type: object
-      properties:
-        _id:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-    ItemCreate:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-    ItemUpdate:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
           type: string

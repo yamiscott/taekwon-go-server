@@ -36,7 +36,7 @@ describe('Users API', () => {
     const school = await School.create({ name: 'Invite School' });
 
     const res = await request(app)
-      .post('/users')
+      .post('/cms/users')
       .set('Authorization', `Bearer ${token}`)
       .send({ email: 'u1@example.com', school: school._id });
 
@@ -66,7 +66,7 @@ describe('Users API', () => {
 
     // attempt to invite user for school B; should be forced to admin's school (A)
     const inviteRes = await request(app)
-      .post('/users')
+      .post('/cms/users')
       .set('Authorization', `Bearer ${token}`)
       .send({ email: 'u2@example.com', school: schoolB._id });
 
@@ -88,7 +88,7 @@ describe('Users API', () => {
     // login as super
     const superLogin = await request(app).post('/cms/auth/login').send({ email: 'root3@example.com', password: 'p1' });
     const superToken = superLogin.body.token;
-    const allRes = await request(app).get('/users').set('Authorization', `Bearer ${superToken}`);
+    const allRes = await request(app).get('/cms/users').set('Authorization', `Bearer ${superToken}`);
     expect(allRes.statusCode).toBe(200);
     expect(Array.isArray(allRes.body)).toBe(true);
     expect(allRes.body.length).toBeGreaterThanOrEqual(2);
@@ -96,18 +96,18 @@ describe('Users API', () => {
     // login as school admin
     const schoolLogin = await request(app).post('/cms/auth/login').send({ email: 's2@example.com', password: 'p2' });
     const schoolToken = schoolLogin.body.token;
-    const scopedRes = await request(app).get('/users').set('Authorization', `Bearer ${schoolToken}`);
+    const scopedRes = await request(app).get('/cms/users').set('Authorization', `Bearer ${schoolToken}`);
     expect(scopedRes.statusCode).toBe(200);
     expect(Array.isArray(scopedRes.body)).toBe(true);
     expect(scopedRes.body.every(u => String(u.school) === String(school._id))).toBe(true);
 
     // delete user as superadmin
-    const delRes = await request(app).delete(`/users/${u2._id}`).set('Authorization', `Bearer ${superToken}`);
+    const delRes = await request(app).delete(`/cms/users/${u2._id}`).set('Authorization', `Bearer ${superToken}`);
     expect(delRes.statusCode).toBe(204);
 
     // invite again then delete as school admin (should be forbidden when different school)
     const u3 = await User.create({ email: 'c@x.com', school: null });
-    const forbidden = await request(app).delete(`/users/${u3._id}`).set('Authorization', `Bearer ${schoolToken}`);
+    const forbidden = await request(app).delete(`/cms/users/${u3._id}`).set('Authorization', `Bearer ${schoolToken}`);
     expect(forbidden.statusCode).toBe(403);
   });
 });

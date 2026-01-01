@@ -23,8 +23,7 @@ app.use('/cms/schools', schoolsRoutes);
 // App (client-side) endpoints
 const appAuth = require('./routes/appAuth');
 app.use('/auth', appAuth); // app user auth
-app.use('/users', usersRoutes);
-app.use('/items', items);
+app.use('/cms/users', usersRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {
