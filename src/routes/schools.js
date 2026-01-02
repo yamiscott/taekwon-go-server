@@ -1,9 +1,37 @@
 const express = require('express');
+const multer = require('multer');
+const path = require('path');
 const School = require('../models/school');
 const Admin = require('../models/admin');
 const auth = require('../middleware/auth');
 
 const router = express.Router();
+
+// Configure multer for school logo uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'school-logo-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    if (extname && mimetype) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PNG and JPG images are allowed'));
+    }
+  }
+});
 
 async function getRequester(req) {
   if (!req.user || !req.user.sub) return null;
@@ -87,6 +115,25 @@ router.delete('/:id', auth, async (req, res, next) => {
     if (!school) return res.status(404).json({ error: 'Not found' });
     await School.deleteOne({ _id: school._id });
     res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Upload school logo
+router.patch('/:id/logo', auth, upload.single('logo'), async (req, res, next) => {
+  try {
+    const requester = await getRequester(req);
+    if (!requester) return res.status(401).json({ error: 'Unauthorized' });
+    const school = await School.findById(req.params.id);
+    if (!school) return res.status(404).json({ error: 'Not found' });
+    if (requester.role !== 'superadmin' && String(requester.school) !== String(school._id)) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    school.logoUrl = '/uploads/' + req.file.filename;
+    await school.save();
+    res.json(school);
   } catch (err) {
     next(err);
   }

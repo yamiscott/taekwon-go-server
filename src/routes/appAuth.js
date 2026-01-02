@@ -32,13 +32,20 @@ router.get('/me', auth, async (req, res, next) => {
     if (!req.user || !req.user.sub) return res.status(401).json({ error: 'Unauthorized' });
     const user = await User.findById(req.user.sub).select('-__v');
     if (!user) return res.status(404).json({ error: 'Not found' });
-    let schoolName = null;
+    let schoolData = null;
     if (user.school) {
-      const school = await School.findById(user.school).select('name');
-      if (school) schoolName = school.name;
+      const school = await School.findById(user.school).select('name logoUrl');
+      if (school) {
+        const apiBaseUrl = process.env.API_BASE_URL || process.env.CMS_BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+        schoolData = {
+          _id: user.school,
+          name: school.name,
+          logoUrl: school.logoUrl ? `${apiBaseUrl}${school.logoUrl}` : null
+        };
+      }
     }
     const userObj = user.toObject();
-    userObj.school = user.school ? { _id: user.school, name: schoolName } : null;
+    userObj.school = schoolData;
     return res.json({ user: userObj });
   } catch (err) {
     next(err);

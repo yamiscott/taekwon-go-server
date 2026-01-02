@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import SchoolDetails from './SchoolDetails'
 
 export default function Schools({ token }) {
   const [schools, setSchools] = useState([])
@@ -7,9 +8,10 @@ export default function Schools({ token }) {
   const [address, setAddress] = useState('')
   const [contact, setContact] = useState('')
   const [error, setError] = useState(null)
+  const [manageSchoolId, setManageSchoolId] = useState(null)
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
-  useEffect(() => {
+  const loadSchools = () => {
     if (!token) return
     setLoading(true)
     fetch(apiBase + '/cms/schools', { headers: { Authorization: `Bearer ${token}` } })
@@ -17,6 +19,10 @@ export default function Schools({ token }) {
       .then((d) => setSchools(Array.isArray(d) ? d : []))
       .catch(() => setError('Failed to load'))
       .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    loadSchools()
   }, [token])
 
   const handleCreate = async (e) => {
@@ -30,6 +36,12 @@ export default function Schools({ token }) {
     } catch (err) {
       setError(err.message || 'Error')
     }
+  }
+
+  const handleDelete = async (id) => {
+    if (!confirm('Delete this school?')) return
+    const r = await fetch(apiBase + `/cms/schools/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+    if (r.ok) setSchools(schools.filter((x) => x._id !== id))
   }
 
   if (loading) return <div><p>Loading...</p></div>
@@ -60,34 +72,30 @@ export default function Schools({ token }) {
         <tbody>
           {schools.map((s) => (
             <tr key={s._id}>
-              <td style={{ padding: 6 }}>{s._editing ? <input value={s._name} onChange={(e) => setSchools(schools.map(x => x._id === s._id ? { ...x, _name: e.target.value } : x))} /> : s.name}</td>
-              <td style={{ padding: 6 }}>{s._editing ? <input value={s._address} onChange={(e) => setSchools(schools.map(x => x._id === s._id ? { ...x, _address: e.target.value } : x))} /> : s.address}</td>
-              <td style={{ padding: 6 }}>{s._editing ? <input value={s._contact} onChange={(e) => setSchools(schools.map(x => x._id === s._id ? { ...x, _contact: e.target.value } : x))} /> : s.contact}</td>
+              <td style={{ padding: 6 }}>{s.name}</td>
+              <td style={{ padding: 6 }}>{s.address}</td>
+              <td style={{ padding: 6 }}>{s.contact}</td>
               <td style={{ padding: 6 }}>
-                {s._editing ? (
-                  <>
-                    <button className="btn btn-small" onClick={async () => {
-                      try {
-                        const body = { name: s._name, address: s._address, contact: s._contact };
-                        const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/cms/schools/${s._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body) });
-                        if (!r.ok) throw new Error('Update failed');
-                        const d = await r.json();
-                        setSchools(schools.map(x => x._id === s._id ? d : x));
-                      } catch (err) { console.error(err); }
-                    }}>Save</button>
-                    <button className="btn btn-small" onClick={() => setSchools(schools.map(x => x._id === s._id ? { ...x, _editing: false } : x))}>Cancel</button>
-                  </>
-                ) : (
-                  <>
-                    <button className="btn btn-small" onClick={() => setSchools(schools.map(x => x._id === s._id ? { ...x, _editing: true, _name: s.name, _address: s.address, _contact: s.contact } : x))}>Edit</button>
-                    <button className="btn btn-small" onClick={async () => { if (!confirm('Delete this school?')) return; const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/cms/schools/${s._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); if (r.ok) setSchools(schools.filter(x => x._id !== s._id)); }}>Delete</button>
-                  </>
-                )}
+                <button className="btn btn-small" onClick={() => setManageSchoolId(s._id)}>Manage</button>
+                <button className="btn btn-small" onClick={() => handleDelete(s._id)}>Delete</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {manageSchoolId && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(9,13,23,0.76)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, zIndex: 2000 }}>
+          <SchoolDetails
+            schoolId={manageSchoolId}
+            token={token}
+            onClose={() => setManageSchoolId(null)}
+            onUpdated={() => {
+              loadSchools()
+            }}
+          />
+        </div>
+      )}
     </div>
   )
 }

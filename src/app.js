@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 const items = require('./routes/items');
 const authRoutes = require('./routes/auth');
 const adminsRoutes = require('./routes/admins');
@@ -10,8 +12,17 @@ const { connect } = require('./db');
 
 const app = express();
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 app.use(cors({ origin: true }));
 app.use(express.json());
+
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
@@ -40,7 +51,6 @@ if (process.env.NODE_ENV !== 'test') {
 
 
 // Serve frontend static files
-const path = require('path');
 const frontendDist = path.join(__dirname, '../frontend/dist');
 app.use(express.static(frontendDist));
 
