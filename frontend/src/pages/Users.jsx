@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import UserDetails from './UserDetails'
 
-export default function Users({ token }) {
+export default function Users({ token, admin }) {
   const [users, setUsers] = useState([])
   const [schools, setSchools] = useState([])
   const [loading, setLoading] = useState(true)
@@ -14,6 +14,7 @@ export default function Users({ token }) {
   const [resetError, setResetError] = useState(null)
   const [manageUserId, setManageUserId] = useState(null);
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+  const isSchoolAdmin = admin?.role === 'school'
 
   useEffect(() => {
     if (!token) return
@@ -25,10 +26,15 @@ export default function Users({ token }) {
       .then(([usersRes, schoolsRes]) => {
         setUsers(Array.isArray(usersRes) ? usersRes : [])
         setSchools(Array.isArray(schoolsRes) ? schoolsRes : [])
+        // Auto-select school for school admins
+        if (isSchoolAdmin && admin.school) {
+          const schoolId = typeof admin.school === 'object' ? admin.school._id : admin.school
+          setSchool(schoolId)
+        }
       })
       .catch(() => setError('Failed to load'))
       .finally(() => setLoading(false))
-  }, [token, apiBase])
+  }, [token, apiBase, admin])
 
   const reloadUsers = () => {
     setLoading(true)
@@ -55,7 +61,8 @@ export default function Users({ token }) {
       if (!r.ok) throw new Error(d.error || 'Failed')
       setUsers([d, ...users])
       setEmail('')
-      setSchool('')
+      // Only reset school if not a school admin
+      if (!isSchoolAdmin) setSchool('')
     } catch (err) {
       setError(err.message || 'Error')
     }
@@ -70,9 +77,9 @@ export default function Users({ token }) {
 
       <form onSubmit={handleInvite} style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-          <input placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <select value={school} onChange={(e) => setSchool(e.target.value)}>
-            <option value="">-- select school (optional) --</option>
+          <input placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <select value={school} onChange={(e) => setSchool(e.target.value)} disabled={isSchoolAdmin} required={isSchoolAdmin}>
+            <option value="">{isSchoolAdmin ? '-- your school --' : '-- select school (optional) --'}</option>
             {schools.map((s) => (
               <option key={s._id} value={s._id}>{s.name}</option>
             ))}

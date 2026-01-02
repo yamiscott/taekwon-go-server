@@ -80,11 +80,11 @@ export default function Dashboard({ token, onLogout }) {
           </div>
         )}
 
-        {page === 'admins' && <Admins token={token} />}
+        {page === 'admins' && <Admins token={token} admin={admin} />}
 
-        {page === 'users' && <Users token={token} />}
+        {page === 'users' && <Users token={token} admin={admin} />}
 
-        {page === 'schools' && <Schools token={token} />}
+        {page === 'schools' && <Schools token={token} admin={admin} />}
       </RightPanel>
     </div>
   )

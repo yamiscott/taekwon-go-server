@@ -17,11 +17,11 @@ router.get('/', auth, async (req, res, next) => {
     const requester = await getRequester(req);
     if (!requester) return res.status(401).json({ error: 'Unauthorized' });
     if (requester.role === 'superadmin') {
-      const admins = await Admin.find().select('-passwordHash');
+      const admins = await Admin.find().select('-passwordHash').populate('school', 'name');
       return res.json(admins);
     }
     // school admin: only admins in same school
-    const admins = await Admin.find({ school: requester.school }).select('-passwordHash');
+    const admins = await Admin.find({ school: requester.school }).select('-passwordHash').populate('school', 'name');
     return res.json(admins);
   } catch (err) {
     next(err);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import SchoolDetails from './SchoolDetails'
 
-export default function Schools({ token }) {
+export default function Schools({ token, admin }) {
   const [schools, setSchools] = useState([])
   const [loading, setLoading] = useState(true)
   const [name, setName] = useState('')
@@ -10,6 +10,7 @@ export default function Schools({ token }) {
   const [error, setError] = useState(null)
   const [manageSchoolId, setManageSchoolId] = useState(null)
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+  const isSchoolAdmin = admin?.role === 'school'
 
   const loadSchools = () => {
     if (!token) return
@@ -51,14 +52,14 @@ export default function Schools({ token }) {
       <h2>Schools</h2>
       {error && <p className="error">{error}</p>}
 
-      <form onSubmit={handleCreate} style={{ marginBottom: 20 }}>
+      {!isSchoolAdmin && <form onSubmit={handleCreate} style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
           <input placeholder="name" value={name} onChange={(e) => setName(e.target.value)} />
           <input placeholder="address" value={address} onChange={(e) => setAddress(e.target.value)} />
           <input placeholder="contact" value={contact} onChange={(e) => setContact(e.target.value)} />
           <button className="btn" type="submit">Create</button>
         </div>
-      </form>
+      </form>}
 
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
@@ -77,7 +78,7 @@ export default function Schools({ token }) {
               <td style={{ padding: 6 }}>{s.contact}</td>
               <td style={{ padding: 6 }}>
                 <button className="btn btn-small" onClick={() => setManageSchoolId(s._id)}>Manage</button>
-                <button className="btn btn-small" onClick={() => handleDelete(s._id)}>Delete</button>
+                {!isSchoolAdmin && <button className="btn btn-small" onClick={() => handleDelete(s._id)}>Delete</button>}
               </td>
             </tr>
           ))}

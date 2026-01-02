@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-export default function Admins({ token }) {
+export default function Admins({ token, admin }) {
   const [admins, setAdmins] = useState([])
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
@@ -11,6 +11,7 @@ export default function Admins({ token }) {
   const [error, setError] = useState(null)
 
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+  const isSchoolAdmin = admin?.role === 'school'
 
   useEffect(() => {
     if (!token) return
@@ -22,14 +23,26 @@ export default function Admins({ token }) {
       .then(([adminsRes, schoolsRes]) => {
         setAdmins(Array.isArray(adminsRes) ? adminsRes : [])
         setSchools(Array.isArray(schoolsRes) ? schoolsRes : [])
+        // Auto-select school for school admins
+        if (isSchoolAdmin && admin.school) {
+          const schoolId = typeof admin.school === 'object' ? admin.school._id : admin.school
+          setSchool(schoolId)
+        }
       })
       .catch((err) => setError('Failed to load'))
       .finally(() => setLoading(false))
-  }, [token])
+  }, [token, admin])
 
   const handleCreate = async (e) => {
     e.preventDefault()
     setError(null)
+    
+    // Validate that school admin must have a school selected
+    if (role === 'school' && !school) {
+      setError('School Admin must have a school selected')
+      return
+    }
+    
     try {
       const body = { email, password, role }
       if (role === 'school') body.school = school || null
@@ -39,7 +52,8 @@ export default function Admins({ token }) {
       setAdmins([d, ...admins])
       setEmail('')
       setPassword('')
-      setSchool('')
+      // Only reset school if not a school admin
+      if (!isSchoolAdmin) setSchool('')
     } catch (err) {
       setError(err.message || 'Error')
     }
@@ -56,12 +70,12 @@ export default function Admins({ token }) {
         <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
           <input placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} />
           <input placeholder="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <select value={role} onChange={(e) => setRole(e.target.value)}>
+          <select value={role} onChange={(e) => setRole(e.target.value)} disabled={isSchoolAdmin}>
             <option value="school">School Admin</option>
-            <option value="superadmin">Super Admin</option>
+            {!isSchoolAdmin && <option value="superadmin">Super Admin</option>}
           </select>
           {role === 'school' && (
-            <select value={school} onChange={(e) => setSchool(e.target.value)}>
+            <select value={school} onChange={(e) => setSchool(e.target.value)} disabled={isSchoolAdmin} required>
               <option value="">-- select school --</option>
               {schools.map((s) => (
                 <option key={s._id} value={s._id}>{s.name}</option>
