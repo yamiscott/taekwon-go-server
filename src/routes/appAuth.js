@@ -45,4 +45,22 @@ router.get('/me', auth, async (req, res, next) => {
   }
 });
 
+// Accept invite and set password (token-based, for app users)
+router.post('/accept', async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) return res.status(400).json({ error: 'Token and password required' });
+    const user = await User.findOne({ inviteToken: token });
+    if (!user) return res.status(400).json({ error: 'Invalid or expired token' });
+    if (user.acceptedAt) return res.status(400).json({ error: 'Already accepted' });
+    user.acceptedAt = new Date();
+    user.passwordHash = await require('bcryptjs').hash(password, 10);
+    user.inviteToken = null;
+    await user.save();
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

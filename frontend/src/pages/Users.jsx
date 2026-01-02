@@ -81,7 +81,13 @@ export default function Users({ token }) {
             <React.Fragment key={u._id}>
               <tr>
                 <td style={{ padding: 6 }}>{u.email}</td>
-                <td style={{ padding: 6 }}>{u.school ? (typeof u.school === 'object' ? u.school.name : u.school) : '-'}</td>
+                <td style={{ padding: 6 }}>{(() => {
+                  if (!u.school) return '-';
+                  if (typeof u.school === 'object' && u.school.name) return u.school.name;
+                  // If u.school is an ID, look up in schools array
+                  const found = schools.find(s => s._id === u.school);
+                  return found ? found.name : u.school;
+                })()}</td>
                 <td style={{ padding: 6 }}>{u.invitedAt ? new Date(u.invitedAt).toLocaleString() : '-'}</td>
                 <td style={{ padding: 6 }}>{u.acceptedAt ? new Date(u.acceptedAt).toLocaleString() : '-'}</td>
                 <td style={{ padding: 6, fontFamily: 'monospace', fontSize: 12 }}>{u.inviteToken || '-'}</td>

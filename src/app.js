@@ -22,7 +22,9 @@ app.use('/cms/schools', schoolsRoutes);
 
 // App (client-side) endpoints
 const appAuth = require('./routes/appAuth');
+const inviteRoutes = require('./routes/invite');
 app.use('/auth', appAuth); // app user auth
+app.use('/auth', inviteRoutes); // invite validation
 app.use('/cms/users', usersRoutes);
 
 // Global error handler

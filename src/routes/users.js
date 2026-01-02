@@ -48,30 +48,26 @@ router.post('/', auth, async (req, res, next) => {
 
     const inviteToken = crypto.randomBytes(32).toString('hex');
     const created = await User.create({ email, school: finalSchool, inviteToken });
-    // TODO: Send invite email with link containing inviteToken
+    // Send invite email with link containing inviteToken and school name
+    try {
+      const { sendInviteEmail } = require('../utils/email');
+      let schoolName = null;
+      if (finalSchool) {
+        const School = require('../models/school');
+        const schoolDoc = await School.findById(finalSchool);
+        if (schoolDoc) schoolName = schoolDoc.name;
+      }
+      await sendInviteEmail({ to: email, token: inviteToken, schoolName });
+    } catch (e) {
+      console.error('Failed to send invite email:', e);
+      // Optionally: return error or just log and continue
+    }
     res.status(201).json({ ...created.toObject(), inviteToken });
   } catch (err) {
     next(err);
   }
 });
 
-// Accept invite and set password (token-based)
-router.post('/accept', async (req, res, next) => {
-  try {
-    const { token, password } = req.body;
-    if (!token || !password) return res.status(400).json({ error: 'Token and password required' });
-    const user = await User.findOne({ inviteToken: token });
-    if (!user) return res.status(400).json({ error: 'Invalid or expired token' });
-    if (user.acceptedAt) return res.status(400).json({ error: 'Already accepted' });
-    user.acceptedAt = new Date();
-    user.passwordHash = await bcrypt.hash(password, 10);
-    user.inviteToken = null;
-    await user.save();
-    res.json({ success: true });
-  } catch (err) {
-    next(err);
-  }
-});
 
 // Admin sets user password
 router.post('/:id/set-password', auth, async (req, res, next) => {

@@ -8,6 +8,9 @@ services:
     environment:
       - MONGODB_URI=mongodb://mongo:27017/mydb
       - PORT=3000
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - SENDGRID_FROM=${SENDGRID_FROM}
+      - CMS_BASE_URL=${CMS_BASE_URL}
     depends_on:
       - mongo
   mongo:
