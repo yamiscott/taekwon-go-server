@@ -104,6 +104,4 @@ body {
   .login-card { grid-template-columns: 1fr; }
   .login-left { padding: 28px; }
   .login-right { padding: 20px; }
-  .sidebar { display: none; }
-  body > div[style*='maxWidth: 1000'] { flex-direction: column !important; min-width: 0 !important; }
 }

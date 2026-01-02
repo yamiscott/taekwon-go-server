@@ -22,7 +22,7 @@ app.use(cors({ origin: true }));
 app.use(express.json());
 
 // Serve uploaded files
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(uploadsDir));
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 

@@ -12,7 +12,7 @@ services:
       - SENDGRID_FROM=${SENDGRID_FROM}
       - CMS_BASE_URL=${CMS_BASE_URL}
     volumes:
-      - uploads:/app/uploads
+      - uploads:/usr/src/app/uploads
     depends_on:
       - mongo
   mongo:
