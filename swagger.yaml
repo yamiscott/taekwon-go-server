@@ -148,6 +148,61 @@ paths:
                                 schema:
                                   $ref: '#/components/schemas/User'
                     /cms/users/{id}:
+                      get:
+                        summary: Get user by ID (admin only)
+                        tags: [Users]
+                        security:
+                          - bearerAuth: []
+                        parameters:
+                          - in: path
+                            name: id
+                            schema:
+                              type: string
+                            required: true
+                        responses:
+                          '200':
+                            description: User details
+                            content:
+                              application/json:
+                                schema:
+                                  $ref: '#/components/schemas/User'
+                      patch:
+                        summary: Update user details (admin only)
+                        tags: [Users]
+                        security:
+                          - bearerAuth: []
+                        parameters:
+                          - in: path
+                            name: id
+                            schema:
+                              type: string
+                            required: true
+                        requestBody:
+                          required: true
+                          content:
+                            application/json:
+                              schema:
+                                type: object
+                                properties:
+                                  belt:
+                                    type: string
+                                  isMaster:
+                                    type: boolean
+                                  isGrandmaster:
+                                    type: boolean
+                                  active:
+                                    type: boolean
+                                  fullName:
+                                    type: string
+                                  address:
+                                    type: string
+                        responses:
+                          '200':
+                            description: Updated user
+                            content:
+                              application/json:
+                                schema:
+                                  $ref: '#/components/schemas/User'
                       delete:
                         summary: Delete user (admin only)
                         tags: [Users]
@@ -489,7 +544,17 @@ components:
         email:
           type: string
         school:
+          oneOf:
+            - type: string
+            - type: object
+              properties:
+                _id:
+                  type: string
+                name:
+                  type: string
+        invitedAt:
           type: string
+          format: date-time
         acceptedAt:
           type: string
           format: date-time
@@ -502,6 +567,18 @@ components:
         resetTokenExpires:
           type: string
           format: date-time
+        belt:
+          type: string
+        isMaster:
+          type: boolean
+        isGrandmaster:
+          type: boolean
+        active:
+          type: boolean
+        fullName:
+          type: string
+        address:
+          type: string
     UserInvite:
       type: object
       properties:
