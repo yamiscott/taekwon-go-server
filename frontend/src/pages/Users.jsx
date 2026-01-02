@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from 'react'
+import UserDetails from './UserDetails'
 
 export default function Users({ token }) {
   const [users, setUsers] = useState([])
@@ -11,6 +12,7 @@ export default function Users({ token }) {
   const [resetUserId, setResetUserId] = useState(null)
   const [resetPassword, setResetPassword] = useState('')
   const [resetError, setResetError] = useState(null)
+  const [manageUserId, setManageUserId] = useState(null);
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
   useEffect(() => {
@@ -26,7 +28,21 @@ export default function Users({ token }) {
       })
       .catch(() => setError('Failed to load'))
       .finally(() => setLoading(false))
-  }, [token])
+  }, [token, apiBase])
+
+  const reloadUsers = () => {
+    setLoading(true)
+    Promise.all([
+      fetch(apiBase + '/cms/users', { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+      fetch(apiBase + '/cms/schools', { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json())
+    ])
+      .then(([usersRes, schoolsRes]) => {
+        setUsers(Array.isArray(usersRes) ? usersRes : [])
+        setSchools(Array.isArray(schoolsRes) ? schoolsRes : [])
+      })
+      .catch(() => setError('Failed to load'))
+      .finally(() => setLoading(false))
+  }
 
   const handleInvite = async (e) => {
     e.preventDefault()
@@ -72,7 +88,6 @@ export default function Users({ token }) {
             <th style={{ textAlign: 'left', padding: 6 }}>School</th>
             <th style={{ textAlign: 'left', padding: 6 }}>Invited</th>
             <th style={{ textAlign: 'left', padding: 6 }}>Accepted</th>
-            <th style={{ textAlign: 'left', padding: 6 }}>Invite Token</th>
             <th style={{ textAlign: 'left', padding: 6 }}>Actions</th>
           </tr>
         </thead>
@@ -88,11 +103,11 @@ export default function Users({ token }) {
                   const found = schools.find(s => s._id === u.school);
                   return found ? found.name : u.school;
                 })()}</td>
-                <td style={{ padding: 6 }}>{u.invitedAt ? new Date(u.invitedAt).toLocaleString() : '-'}</td>
-                <td style={{ padding: 6 }}>{u.acceptedAt ? new Date(u.acceptedAt).toLocaleString() : '-'}</td>
-                <td style={{ padding: 6, fontFamily: 'monospace', fontSize: 12 }}>{u.inviteToken || '-'}</td>
+                <td style={{ padding: 6 }}>{u.invitedAt ? '✅' : '❌'}</td>
+                <td style={{ padding: 6 }}>{u.acceptedAt ? '✅' : '❌'}</td>
                 <td style={{ padding: 6 }}>
-                  <button className="btn btn-small" onClick={async () => { if (!confirm('Delete this user?')) return; const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/cms/users/${u._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); if (r.ok) setUsers(users.filter(x => x._id !== u._id)); }}>Delete</button>
+                  <button className="btn btn-small" onClick={() => setManageUserId(u._id)}>Manage</button>
+                  <button className="btn btn-small" style={{ marginLeft: 4 }} onClick={async () => { if (!confirm('Delete this user?')) return; const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/cms/users/${u._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); if (r.ok) setUsers(users.filter(x => x._id !== u._id)); }}>Delete</button>
                   <button className="btn btn-small" style={{ marginLeft: 4 }} onClick={() => { setResetUserId(u._id); setResetPassword(''); setResetError(null); }}>Set Password</button>
                   {!u.acceptedAt && (
                     <button className="btn btn-small" style={{ marginLeft: 4 }} onClick={async () => {
@@ -107,6 +122,13 @@ export default function Users({ token }) {
                     }}>Accept</button>
                   )}
                 </td>
+                    {manageUserId && (
+                      <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.25)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ background: 'white', borderRadius: 12, boxShadow: '0 8px 32px rgba(2,6,23,0.25)' }}>
+                          <UserDetails userId={manageUserId} token={token} onClose={() => setManageUserId(null)} onUserUpdated={() => { setManageUserId(null); reloadUsers(); }} />
+                        </div>
+                      </div>
+                    )}
               </tr>
               {resetUserId === u._id && (
                 <tr>

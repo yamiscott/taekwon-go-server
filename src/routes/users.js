@@ -68,6 +68,22 @@ router.post('/', auth, async (req, res, next) => {
   }
 });
 
+// Get single user by ID (for CMS manage modal)
+router.get('/:id', auth, async (req, res, next) => {
+  try {
+    const requester = await getRequester(req);
+    if (!requester) return res.status(401).json({ error: 'Unauthorized' });
+    const user = await User.findById(req.params.id).populate('school', 'name');
+    if (!user) return res.status(404).json({ error: 'Not found' });
+    // Only allow access if superadmin or same school
+    if (requester.role !== 'superadmin' && String(user.school?._id) !== String(requester.school)) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    res.json(user);
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Admin sets user password
 router.post('/:id/set-password', auth, async (req, res, next) => {
@@ -115,6 +131,31 @@ router.post('/reset', async (req, res, next) => {
     user.resetTokenExpires = null;
     await user.save();
     res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Update user details (PATCH)
+router.patch('/:id', auth, async (req, res, next) => {
+  try {
+    const requester = await getRequester(req);
+    if (!requester) return res.status(401).json({ error: 'Unauthorized' });
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'Not found' });
+    // Only allow access if superadmin or same school
+    if (requester.role !== 'superadmin' && String(user.school) !== String(requester.school)) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    const { belt, isMaster, isGrandmaster, active, fullName, address } = req.body;
+    if (belt !== undefined) user.belt = belt;
+    if (isMaster !== undefined) user.isMaster = isMaster;
+    if (isGrandmaster !== undefined) user.isGrandmaster = isGrandmaster;
+    if (active !== undefined) user.active = active;
+    if (fullName !== undefined) user.fullName = fullName;
+    if (address !== undefined) user.address = address;
+    await user.save();
+    res.json(user);
   } catch (err) {
     next(err);
   }
