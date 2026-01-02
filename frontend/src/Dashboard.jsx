@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import Admins from './pages/Admins'
 import Users from './pages/Users'
 import Schools from './pages/Schools'
+import Home from './pages/Home'
 import RightPanel from './components/RightPanel'
 
 export default function Dashboard({ token, onLogout }) {
@@ -64,21 +65,7 @@ export default function Dashboard({ token, onLogout }) {
       </div>
 
       <RightPanel>
-        {page === 'home' && (
-          <div className="login-right">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h2>Welcome, {admin.email}</h2>
-                <p className="muted">Role: <strong style={{ textTransform: 'capitalize' }}>{admin.role}</strong></p>
-              </div>
-            </div>
-
-            <div style={{ marginTop: 20 }}>
-              <h3>Dashboard</h3>
-              <p className="muted">This is a protected area — API validated the JWT.</p>
-            </div>
-          </div>
-        )}
+        {page === 'home' && <Home token={token} admin={admin} />}
 
         {page === 'admins' && <Admins token={token} admin={admin} />}
 

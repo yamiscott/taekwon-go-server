@@ -8,6 +8,7 @@ const authRoutes = require('./routes/auth');
 const adminsRoutes = require('./routes/admins');
 const usersRoutes = require('./routes/users');
 const schoolsRoutes = require('./routes/schools');
+const dashboardRoutes = require('./routes/dashboard');
 const { connect } = require('./db');
 
 const app = express();
@@ -30,6 +31,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 app.use('/cms/auth', authRoutes);
 app.use('/cms/admins', adminsRoutes);
 app.use('/cms/schools', schoolsRoutes);
+app.use('/cms/dashboard', dashboardRoutes);
 
 // App (client-side) endpoints
 const appAuth = require('./routes/appAuth');
