@@ -1,46 +1,34 @@
 import React, { useEffect, useState } from 'react';
 
-const BELTS = [
-  { value: 'white', label: 'White' },
-  { value: 'orange_stripe', label: 'Orange Stripe' },
-  { value: 'purple_stripe', label: 'Purple Stripe' },
-  { value: 'yellow_stripe', label: 'Yellow Stripe' },
-  { value: 'yellow', label: 'Yellow' },
-  { value: 'green_stripe', label: 'Green Stripe' },
-  { value: 'green', label: 'Green' },
-  { value: 'blue_stripe', label: 'Blue Stripe' },
-  { value: 'blue', label: 'Blue' },
-  { value: 'red_stripe', label: 'Red Stripe' },
-  { value: 'red', label: 'Red' },
-  { value: 'black_stripe', label: 'Black Stripe' },
-  { value: 'black_1', label: 'Black 1st Dan' },
-  { value: 'black_2', label: 'Black 2nd Dan' },
-  { value: 'black_3', label: 'Black 3rd Dan' },
-  { value: 'black_4', label: 'Black 4th Dan' },
-  { value: 'black_5', label: 'Black 5th Dan' },
-  { value: 'black_6', label: 'Black 6th Dan' },
-  { value: 'black_7', label: 'Black 7th Dan' },
-  { value: 'black_8', label: 'Black 8th Dan' },
-  { value: 'black_9', label: 'Black 9th Dan' },
-];
-
 export default function UserDetails({ userId, token, onClose, onUserUpdated }) {
   const [user, setUser] = useState(null);
+  const [belts, setBelts] = useState([]);
   const [edit, setEdit] = useState(false);
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+  useEffect(() => {
+    // Fetch belts
+    fetch(`${apiBase}/cms/belts`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(r => r.json())
+      .then(d => setBelts(Array.isArray(d) ? d : []))
+      .catch(err => console.error('Failed to load belts:', err));
+  }, [token]);
 
   useEffect(() => {
     if (!userId) return;
-    fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/cms/users/${userId}`, {
+    fetch(`${apiBase}/cms/users/${userId}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(r => r.json())
       .then(d => {
         setUser(d);
         setForm({
-          belt: d.belt || '',
+          belt: d.belt?._id || d.belt || '',
           isMaster: !!d.isMaster,
           isGrandmaster: !!d.isGrandmaster,
           active: d.active !== false,
@@ -61,7 +49,7 @@ export default function UserDetails({ userId, token, onClose, onUserUpdated }) {
     setSaving(true);
     setError('');
     try {
-      const r = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3000') + `/cms/users/${userId}`, {
+      const r = await fetch(`${apiBase}/cms/users/${userId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(form)
@@ -118,10 +106,22 @@ export default function UserDetails({ userId, token, onClose, onUserUpdated }) {
           {edit ? (
             <select name="belt" value={form.belt} onChange={handleChange} style={{ width: '100%', padding: 8, borderRadius: 8, border: '1px solid #222', background: '#1a2332', color: '#e0e7ef' }}>
               <option value="">-- Select Belt --</option>
-              {BELTS.map(b => <option key={b.value} value={b.value}>{b.label}</option>)}
+              {belts.map(b => (
+                <option key={b._id} value={b._id}>
+                  {b.name} ({b.kup})
+                  {b.isPuma && ' - Junior Only'}
+                  {b.isDan && ` - ${b.kup}`}
+                </option>
+              ))}
             </select>
           ) : (
-            <span>{BELTS.find(b => b.value === user.belt)?.label || user.belt || '-'}</span>
+            <span>
+              {user.belt ? (
+                typeof user.belt === 'object' ? 
+                  `${user.belt.name} (${user.belt.kup})` : 
+                  belts.find(b => b._id === user.belt)?.name || user.belt
+              ) : '-'}
+            </span>
           )}
           <label style={{ fontWeight: 600 }}>Master:</label>
           {edit ? (

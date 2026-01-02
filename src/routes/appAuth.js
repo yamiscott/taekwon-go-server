@@ -30,7 +30,7 @@ const School = require('../models/school');
 router.get('/me', auth, async (req, res, next) => {
   try {
     if (!req.user || !req.user.sub) return res.status(401).json({ error: 'Unauthorized' });
-    const user = await User.findById(req.user.sub).select('-__v');
+    const user = await User.findById(req.user.sub).select('-__v').populate('belt');
     if (!user) return res.status(404).json({ error: 'Not found' });
     let schoolData = null;
     if (user.school) {

@@ -9,6 +9,9 @@ const adminsRoutes = require('./routes/admins');
 const usersRoutes = require('./routes/users');
 const schoolsRoutes = require('./routes/schools');
 const dashboardRoutes = require('./routes/dashboard');
+const patternsRoutes = require('./routes/patterns');
+const beltsRoutes = require('./routes/belts');
+const sparringRoutes = require('./routes/sparring');
 const { connect } = require('./db');
 
 const app = express();
@@ -32,6 +35,9 @@ app.use('/cms/auth', authRoutes);
 app.use('/cms/admins', adminsRoutes);
 app.use('/cms/schools', schoolsRoutes);
 app.use('/cms/dashboard', dashboardRoutes);
+app.use('/cms/patterns', patternsRoutes);
+app.use('/cms/belts', beltsRoutes);
+app.use('/cms/sparring', sparringRoutes);
 
 // App (client-side) endpoints
 const appAuth = require('./routes/appAuth');
@@ -39,6 +45,11 @@ const inviteRoutes = require('./routes/invite');
 app.use('/auth', appAuth); // app user auth
 app.use('/auth', inviteRoutes); // invite validation
 app.use('/cms/users', usersRoutes);
+
+// Make patterns, belts, and sparring available to app users too
+app.use('/patterns', patternsRoutes);
+app.use('/belts', beltsRoutes);
+app.use('/sparring', sparringRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {

@@ -93,6 +93,7 @@ export default function Users({ token, admin }) {
           <tr>
             <th style={{ textAlign: 'left', padding: 6 }}>Email</th>
             <th style={{ textAlign: 'left', padding: 6 }}>School</th>
+            <th style={{ textAlign: 'left', padding: 6 }}>Belt</th>
             <th style={{ textAlign: 'left', padding: 6 }}>Invited</th>
             <th style={{ textAlign: 'left', padding: 6 }}>Accepted</th>
             <th style={{ textAlign: 'left', padding: 6 }}>Actions</th>
@@ -110,6 +111,13 @@ export default function Users({ token, admin }) {
                   const found = schools.find(s => s._id === u.school);
                   return found ? found.name : u.school;
                 })()}</td>
+                <td style={{ padding: 6 }}>
+                  {u.belt ? (
+                    typeof u.belt === 'object' ? 
+                      `${u.belt.name} (${u.belt.kup})` : 
+                      u.belt
+                  ) : '-'}
+                </td>
                 <td style={{ padding: 6 }}>{u.invitedAt ? '✅' : '❌'}</td>
                 <td style={{ padding: 6 }}>{u.acceptedAt ? '✅' : '❌'}</td>
                 <td style={{ padding: 6 }}>

@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
   inviteToken: { type: String, default: null },
   resetToken: { type: String, default: null },
   resetTokenExpires: { type: Date, default: null },
-  belt: { type: String, default: null },
+  belt: { type: mongoose.Schema.Types.ObjectId, ref: 'Belt', default: null },
   isMaster: { type: Boolean, default: false },
   isGrandmaster: { type: Boolean, default: false },
   active: { type: Boolean, default: true },

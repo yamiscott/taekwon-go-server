@@ -18,10 +18,10 @@ router.get('/', auth, async (req, res, next) => {
     const requester = await getRequester(req);
     if (!requester) return res.status(401).json({ error: 'Unauthorized' });
     if (requester.role === 'superadmin') {
-      const users = await User.find();
+      const users = await User.find().populate('belt').populate('school');
       return res.json(users);
     }
-    const users = await User.find({ school: requester.school });
+    const users = await User.find({ school: requester.school }).populate('belt').populate('school');
     return res.json(users);
   } catch (err) {
     next(err);
@@ -73,7 +73,7 @@ router.get('/:id', auth, async (req, res, next) => {
   try {
     const requester = await getRequester(req);
     if (!requester) return res.status(401).json({ error: 'Unauthorized' });
-    const user = await User.findById(req.params.id).populate('school', 'name');
+    const user = await User.findById(req.params.id).populate('school', 'name').populate('belt');
     if (!user) return res.status(404).json({ error: 'Not found' });
     // Only allow access if superadmin or same school
     if (requester.role !== 'superadmin' && String(user.school?._id) !== String(requester.school)) {

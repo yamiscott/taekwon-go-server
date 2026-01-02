@@ -32,6 +32,18 @@ const connect = async () => {
       console.error('Admin seeding error:', err);
     }
 
+    // Seed patterns, belts, and sparring
+    try {
+      const seedPatterns = require('./utils/seedPatterns');
+      const seedBelts = require('./utils/seedBelts');
+      const seedSparring = require('./utils/seedSparring');
+      await seedBelts();
+      await seedPatterns();
+      await seedSparring();
+    } catch (err) {
+      console.error('Data seeding error:', err);
+    }
+
     return mongoose.connection;
   } catch (err) {
     console.error('MongoDB connection error:', err);
