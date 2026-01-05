@@ -32,14 +32,16 @@ const connect = async () => {
       console.error('Admin seeding error:', err);
     }
 
-    // Seed patterns, belts, and sparring
+    // Seed patterns, belts, sparring, and line work
     try {
       const seedPatterns = require('./utils/seedPatterns');
       const seedBelts = require('./utils/seedBelts');
       const seedSparring = require('./utils/seedSparring');
+      const seedLineWork = require('./utils/seedLineWork');
       await seedBelts();
       await seedPatterns();
       await seedSparring();
+      await seedLineWork();
     } catch (err) {
       console.error('Data seeding error:', err);
     }
