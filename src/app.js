@@ -13,6 +13,7 @@ const patternsRoutes = require('./routes/patterns');
 const beltsRoutes = require('./routes/belts');
 const sparringRoutes = require('./routes/sparring');
 const lineWorkRoutes = require('./routes/lineWork');
+const trainingRecordsRoutes = require('./routes/trainingRecords');
 const { connect } = require('./db');
 
 const app = express();
@@ -47,6 +48,7 @@ const inviteRoutes = require('./routes/invite');
 app.use('/auth', appAuth); // app user auth
 app.use('/auth', inviteRoutes); // invite validation
 app.use('/cms/users', usersRoutes);
+app.use('/trainingrecords', trainingRecordsRoutes); // training records for app users
 
 // Make patterns, belts, sparring, and linework available to app users too
 app.use('/patterns', patternsRoutes);

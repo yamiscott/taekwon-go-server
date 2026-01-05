@@ -21,218 +21,53 @@ paths:
                   type: string
                 password:
                   type: string
-                    /cms/users:
-                      get:
-                        summary: List users (admin only)
-                        tags: [Users]
-                        security:
-                          - bearerAuth: []
-                        responses:
-                          '200':
-                            description: List of users
-                            content:
-                              application/json:
-                                schema:
-                                  type: array
-                                  items:
-                                    $ref: '#/components/schemas/User'
-                      post:
-                        summary: Invite user (admin only)
-                        tags: [Users]
-                        security:
-                          - bearerAuth: []
-                        requestBody:
-                          required: true
-                          content:
-                            application/json:
-                              schema:
-                                $ref: '#/components/schemas/UserInvite'
-                        responses:
-                          '201':
-                /cms/users/{id}/set-password:
-                  post:
-                    summary: Set user password (admin only)
-                    tags: [Users]
-                    security:
-                      - bearerAuth: []
-                    parameters:
-                      - in: path
-                        name: id
-                        schema:
-                          type: string
-                        required: true
-                    requestBody:
-                      required: true
-                      content:
-                        application/json:
-                          schema:
-                            type: object
-                            properties:
-                              password:
-                                type: string
-                    responses:
-                      '200':
-                        description: Password set
-                /cms/users/accept:
-                  post:
-                    summary: Accept invite and set password (user)
-                    tags: [Users]
-                    requestBody:
-                      required: true
-                      content:
-                        application/json:
-                          schema:
-                            type: object
-                            properties:
-                              token:
-                                type: string
-                              password:
-                                type: string
-                    responses:
-                      '200':
-                        description: User accepted and password set
-                /cms/users/request-reset:
-                  post:
-                    summary: Request password reset (user)
-                    tags: [Users]
-                    requestBody:
-                      required: true
-                      content:
-                        application/json:
-                          schema:
-                            type: object
-                            properties:
-                              email:
-                                type: string
-                    responses:
-                      '200':
-                        description: Reset email sent
-                /cms/users/reset:
-                  post:
-                    summary: Reset password with token (user)
-                    tags: [Users]
-                    requestBody:
-                      required: true
-                      content:
-                        application/json:
-                          schema:
-                            type: object
-                            properties:
-                              token:
-                                type: string
-                              password:
-                                type: string
-                    responses:
-                      '200':
-                        description: Password reset
-                            description: Invited user
-                            content:
-                              application/json:
-                                schema:
-                                  $ref: '#/components/schemas/User'
-                    /cms/users/{id}/accept:
-                      post:
-                        summary: Accept invite (user)
-                        tags: [Users]
-                        parameters:
-                          - in: path
-                            name: id
-                            schema:
-                              type: string
-                            required: true
-                        responses:
-                          '200':
-                            description: Accepted user
-                            content:
-                              application/json:
-                                schema:
-                                  $ref: '#/components/schemas/User'
-                    /cms/users/{id}:
-                      get:
-                        summary: Get user by ID (admin only)
-                        tags: [Users]
-                        security:
-                          - bearerAuth: []
-                        parameters:
-                          - in: path
-                            name: id
-                            schema:
-                              type: string
-                            required: true
-                        responses:
-                          '200':
-                            description: User details
-                            content:
-                              application/json:
-                                schema:
-                                  $ref: '#/components/schemas/User'
-                      patch:
-                        summary: Update user details (admin only)
-                        tags: [Users]
-                        security:
-                          - bearerAuth: []
-                        parameters:
-                          - in: path
-                            name: id
-                            schema:
-                              type: string
-                            required: true
-                        requestBody:
-                          required: true
-                          content:
-                            application/json:
-                              schema:
-                                type: object
-                                properties:
-                                  belt:
-                                    type: string
-                                  isMaster:
-                                    type: boolean
-                                  isGrandmaster:
-                                    type: boolean
-                                  active:
-                                    type: boolean
-                                  fullName:
-                                    type: string
-                                  address:
-                                    type: string
-                        responses:
-                          '200':
-                            description: Updated user
-                            content:
-                              application/json:
-                                schema:
-                                  $ref: '#/components/schemas/User'
-                      delete:
-                        summary: Delete user (admin only)
-                        tags: [Users]
-                        security:
-                          - bearerAuth: []
-                        parameters:
-                          - in: path
-                            name: id
-                            schema:
-                              type: string
-                            required: true
-                        responses:
-                          '204':
-                            description: Deleted
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
       responses:
         '200':
-          description: Admin info
+          description: JWT token
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Admin'
-    put:
-      summary: Update admin
-      tags: [Admins]
+                type: object
+                properties:
+                  token:
+                    type: string
+  /cms/users:
+    get:
+      summary: List users (admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      summary: Invite user (admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInvite'
+      responses:
+        '201':
+          description: Invited user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /cms/users/{id}/set-password:
+    post:
+      summary: Set user password (admin only)
+      tags: [Users]
       security:
         - bearerAuth: []
       parameters:
@@ -246,17 +81,124 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AdminUpdate'
+              type: object
+              properties:
+                password:
+                  type: string
       responses:
         '200':
-          description: Updated admin
+          description: Password set
+  /cms/users/accept:
+    post:
+      summary: Accept invite and set password (user)
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: User accepted and password set
+  /cms/users/request-reset:
+    post:
+      summary: Request password reset (user)
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: Reset email sent
+  /cms/users/reset:
+    post:
+      summary: Reset password with token (user)
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Password reset
+  /cms/users/{id}:
+    get:
+      summary: Get user by ID (admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: User details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Admin'
+                $ref: '#/components/schemas/User'
+    patch:
+      summary: Update user details (admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                belt:
+                  type: string
+                isMaster:
+                  type: boolean
+                isGrandmaster:
+                  type: boolean
+                active:
+                  type: boolean
+                fullName:
+                  type: string
+                address:
+                  type: string
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
     delete:
-      summary: Delete admin
-      tags: [Admins]
+      summary: Delete user (admin only)
+      tags: [Users]
       security:
         - bearerAuth: []
       parameters:
@@ -358,6 +300,88 @@ paths:
       responses:
         '204':
           description: Deleted
+  /cms/linework:
+    get:
+      summary: Get all line work exercises (CMS)
+      tags: [Line Work]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of line work exercises
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LineWork'
+  /cms/linework/belt/{belt}:
+    get:
+      summary: Get line work by belt (CMS)
+      tags: [Line Work]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: belt
+          schema:
+            type: string
+          required: true
+          description: Belt name (e.g., White, Yellow, Green)
+      responses:
+        '200':
+          description: List of line work exercises for belt
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LineWork'
+  /cms/linework/kup/{kup}:
+    get:
+      summary: Get line work by kup (CMS)
+      tags: [Line Work]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: kup
+          schema:
+            type: string
+          required: true
+          description: Kup level (e.g., 10th Kup, PUMA 1)
+      responses:
+        '200':
+          description: List of line work exercises for kup
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LineWork'
+  /cms/linework/level/{level}:
+    get:
+      summary: Get line work by level (CMS)
+      tags: [Line Work]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: level
+          schema:
+            type: string
+            enum: [Junior, Adult, Both]
+          required: true
+          description: Level (Junior, Adult, or Both)
+      responses:
+        '200':
+          description: List of line work exercises for level
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LineWork'
   /auth/login:
     post:
       summary: App user login
@@ -402,24 +426,140 @@ paths:
                 properties:
                   user:
                     $ref: '#/components/schemas/User'
-  /users:
+  /linework:
     get:
-      summary: List users (admin only)
-      tags: [Users]
+      summary: Get all line work exercises (App)
+      tags: [Line Work]
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: List of users
+          description: List of line work exercises
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/User'
+                  $ref: '#/components/schemas/LineWork'
+  /linework/belt/{belt}:
+    get:
+      summary: Get line work by belt (App)
+      tags: [Line Work]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: belt
+          schema:
+            type: string
+          required: true
+          description: Belt name (e.g., White, Yellow, Green)
+      responses:
+        '200':
+          description: List of line work exercises for belt
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LineWork'
+  /linework/kup/{kup}:
+    get:
+      summary: Get line work by kup (App)
+      tags: [Line Work]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: kup
+          schema:
+            type: string
+          required: true
+          description: Kup level (e.g., 10th Kup, PUMA 1)
+      responses:
+        '200':
+          description: List of line work exercises for kup
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LineWork'
+  /linework/level/{level}:
+    get:
+      summary: Get line work by level (App)
+      tags: [Line Work]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: level
+          schema:
+            type: string
+            enum: [Junior, Adult, Both]
+          required: true
+          description: Level (Junior, Adult, or Both)
+      responses:
+        '200':
+          description: List of line work exercises for level
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LineWork'
+  /trainingrecords:
+    get:
+      summary: Get all training records for authenticated user
+      tags: [Training Records]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date
+          description: Filter records from this date
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date
+          description: Filter records until this date
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 50
+          description: Maximum number of records to return
+        - in: query
+          name: skip
+          schema:
+            type: integer
+            default: 0
+          description: Number of records to skip for pagination
+      responses:
+        '200':
+          description: Paginated list of training records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  records:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TrainingRecord'
+                  total:
+                    type: integer
+                  limit:
+                    type: integer
+                  skip:
+                    type: integer
     post:
-      summary: Invite user (admin only)
-      tags: [Users]
+      summary: Create a new training record
+      tags: [Training Records]
       security:
         - bearerAuth: []
       requestBody:
@@ -427,35 +567,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserInvite'
+              $ref: '#/components/schemas/TrainingRecordCreate'
       responses:
         '201':
-          description: Invited user
+          description: Created training record
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-  /users/{id}/accept:
-    post:
-      summary: Accept invite (user)
-      tags: [Users]
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
-      responses:
-        '200':
-          description: Accepted user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-  /users/{id}:
-    delete:
-      summary: Delete user (admin only)
-      tags: [Users]
+                $ref: '#/components/schemas/TrainingRecord'
+  /trainingrecords/{id}:
+    get:
+      summary: Get a specific training record
+      tags: [Training Records]
       security:
         - bearerAuth: []
       parameters:
@@ -465,8 +588,65 @@ paths:
             type: string
           required: true
       responses:
-        '204':
-          description: Deleted
+        '200':
+          description: Training record details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingRecord'
+        '404':
+          description: Training record not found
+    put:
+      summary: Update a training record
+      tags: [Training Records]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrainingRecordUpdate'
+      responses:
+        '200':
+          description: Updated training record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingRecord'
+        '404':
+          description: Training record not found
+    delete:
+      summary: Delete a training record
+      tags: [Training Records]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Training record deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  deletedRecord:
+                    $ref: '#/components/schemas/TrainingRecord'
+        '404':
+          description: Training record not found
 components:
   securitySchemes:
     bearerAuth:
@@ -586,3 +766,103 @@ components:
           type: string
         school:
           type: string
+    LineWork:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+          description: Name of the line work exercise
+        belt:
+          type: string
+          description: Belt level (e.g., White, Yellow, Green)
+        kup:
+          type: string
+          description: Kup level (e.g., 10th Kup, PUMA 1)
+        level:
+          type: string
+          enum: [Junior, Adult, Both]
+          description: Level (Junior, Adult, or Both)
+        reps:
+          type: integer
+          description: Number of repetitions
+        sets:
+          type: integer
+          description: Number of sets
+        cadence:
+          type: number
+          description: Timing/cadence in seconds
+        order:
+          type: integer
+          description: Order sequence
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    TrainingRecord:
+      type: object
+      properties:
+        _id:
+          type: string
+        user:
+          type: string
+          description: User ID reference
+        date:
+          type: string
+          format: date
+          description: Date of training session
+        activities:
+          type: array
+          items:
+            type: string
+          description: Array of activities performed
+        duration:
+          type: integer
+          description: Duration in minutes
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    TrainingRecordCreate:
+      type: object
+      required:
+        - date
+        - activities
+        - duration
+      properties:
+        date:
+          type: string
+          format: date
+          description: Date of training session
+        activities:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          description: Array of activities performed (must not be empty)
+        duration:
+          type: integer
+          minimum: 1
+          description: Duration in minutes (must be positive)
+    TrainingRecordUpdate:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          description: Date of training session
+        activities:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          description: Array of activities performed
+        duration:
+          type: integer
+          minimum: 1
+          description: Duration in minutes
